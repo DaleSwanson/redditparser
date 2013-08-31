@@ -14,12 +14,12 @@ my $dir = $1; #directory path of script
 #$|++; #autoflush disk buffer
 
 
-my $sub = 'http://www.reddit.com/r/dataisbeautiful/new/'; #url for subreddit, blank to grab from command line
+my $sub = 'http://www.reddit.com/r/AskScienceDiscussion/new/'; #url for subreddit, blank to grab from command line
 if (!$sub) {$sub = $ARGV[0];}
 my $linxdump = 'reddit.html';
 my $outfile = 'reddit.'.time.'.csv';
 my $debug=0;
-my $maxpostlimit = 1000; #stop getting posts after this limit
+my $maxpostlimit = 100; #stop getting posts after this limit
 
 my $temp;
 my $reachedend = 0; #flag, set to 1 when we hit the last post
@@ -48,11 +48,14 @@ do
 	open my $ifile, '<', $linxdump;
 	while (my $filecontents = <$ifile>) 
 	{#go through reddit dump, grab post data
-		while ($filecontents =~ m/<div class="score likes">(\d+)<\/div>/g) 
+		while ($filecontents =~ m/<div class="score unvoted">(\S+)<\/div>/g) 
 		{#find score data
+			my $score = $1;
+			$score =~ s/\D//g;
+			if (!$score) {$score=0;}
 			$totalposts++; #a running count of all posts, does not reset
-			print "\nScore: $1";
-			push(@postscores, $1);
+			print "\nScore: $score";
+			push(@postscores, $score);
 		}
 		#submitted&#32;<time title="1   2   3 4 :5 :6  7    UTC" datetime="2013-08-07T13:04:25-07:00">23 days</time>
 		#submitted&#32;<time title="Wed Aug 7 20:04:25 2013 UTC" datetime="2013-08-07T13:04:25-07:00">23 days</time>
@@ -72,6 +75,7 @@ do
 			if (!$debug) {$reachedend=0;}
 		}
 	}
+	print "\nPosts: $totalposts";
 	if ($totalposts >= $maxpostlimit) {$reachedend=1;}
 } until ($reachedend);
 
