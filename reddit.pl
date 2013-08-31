@@ -7,7 +7,7 @@ use warnings;
 use autodie;
 use Cwd 'abs_path';
 use Date::Calc qw(:all);
-
+use Statistics::Basic qw(:all nofill);
 
 abs_path($0) =~ m/(.*\/)/;
 my $dir = $1; #directory path of script
@@ -19,7 +19,7 @@ if (!$sub) {$sub = $ARGV[0];}
 my $linxdump = 'reddit.html';
 my $outfile = 'reddit.'.time.'.csv';
 my $debug=0;
-my $maxpostlimit = 22; #stop getting posts after this limit
+my $maxpostlimit = 1000; #stop getting posts after this limit
 
 my $temp;
 my $reachedend = 0; #flag, set to 1 when we hit the last post
@@ -30,6 +30,8 @@ my @posthours; #post hours
 my @postdows; #post day of week
 my %mon2num = qw(Jan 01 Feb 02 Mar 03 Apr 04 May 05 Jun 06 Jul 07 Aug 08 Sep 09 Oct 10 Nov 11 Dec 12);
 my %dow2num = qw(Sun 1 Mon 2 Tue 3 Wed 4 Thu 5 Fri 6 Sat 7);
+
+my @postsinhour;
 
 do
 {#grab each page of sub, get post data from each
@@ -74,16 +76,31 @@ do
 
 open my $ofile, '>', $outfile;
 print $ofile "Score;Hour;DOW";
+print "\n\nOverall Median: ".median(@postscores);
 
 for (my $i=0; $i<$totalposts; $i++)
 {#go through data and process
 	print $ofile "\n$postscores[$i];$posthours[$i];$postdows[$i]";
 	
-	
-	
-	
-	
 }
+
+for (my $hour=0; $hour <= 23; $hour++)
+{
+	my @temparray;
+	for (my $i=0; $i<$totalposts; $i++)
+	{#go through data and process
+		if ($posthours[$i] == $hour)
+		{
+			$postsinhour[$hour]++;
+			push(@temparray, $postscores[$i]);
+		}
+		
+	}
+	print "\nHour: $hour";
+	print "\tPosts: $postsinhour[$hour]";
+	print "\tMedian Score: ".median(@temparray);
+}
+
 
 
 close $ofile;
