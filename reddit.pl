@@ -28,10 +28,12 @@ my $totalposts = 0;
 my @postscores; #post scores
 my @posthours; #post hours
 my @postdows; #post day of week
+my @postdates; #formated dates
 my %mon2num = qw(Jan 01 Feb 02 Mar 03 Apr 04 May 05 Jun 06 Jul 07 Aug 08 Sep 09 Oct 10 Nov 11 Dec 12);
 my %dow2num = qw(Sun 1 Mon 2 Tue 3 Wed 4 Thu 5 Fri 6 Sat 7);
 
 my @postsinhour;
+my @postsinday;
 
 do
 {#grab each page of sub, get post data from each
@@ -58,6 +60,8 @@ do
 		{#find time data
 			push(@posthours, $4);
 			push(@postdows, $dow2num{$1});
+			$temp = "$7;".$mon2num{$2}.";$3;$4;$5;$6;".$dow2num{$1};
+			push(@postdates, $temp);
 			#$dow = Day_of_Week($1,$2,$3);
 			print "\nDate: $7-$2-$3 $4:$5:$6 \t$1";
 		}
@@ -75,12 +79,12 @@ do
 
 
 open my $ofile, '>', $outfile;
-print $ofile "Score;Hour;DOW";
+print $ofile "Score;Year;Month;Day;Hour;Min;Sec;DOW";
 print "\n\nOverall Median: ".median(@postscores);
 
 for (my $i=0; $i<$totalposts; $i++)
 {#go through data and process
-	print $ofile "\n$postscores[$i];$posthours[$i];$postdows[$i]";
+	print $ofile "\n$postscores[$i];$postdates[$i]";
 	
 }
 
@@ -101,17 +105,24 @@ for (my $hour=0; $hour <= 23; $hour++)
 	print "\tMedian Score: ".median(@temparray);
 }
 
-
+for (my $day=1; $day <= 7; $day++)
+{
+	my @temparray;
+	for (my $i=0; $i<$totalposts; $i++)
+	{#go through data and process
+		if ($postdows[$i] == $day)
+		{
+			$postsinday[$day]++;
+			push(@temparray, $postscores[$i]);
+		}
+		
+	}
+	print "\nDay: $day";
+	print "\tPosts: $postsinday[$day]";
+	print "\tMedian Score: ".median(@temparray);
+}
 
 close $ofile;
-
-
-
-
-
-
-
-
 
 
 
