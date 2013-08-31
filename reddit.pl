@@ -26,6 +26,8 @@ my @hours; #post hours
 
 do
 { 
+	print "\nURL: $url";
+	$reachedend=1;
 	#wget "http://www.reddit.com/r/dataisbeautiful/top/?sort=top&t=month" -O -  >reddit.txt
 	$temp = "wget \"$url\" -O -  >\"$linxdump\""; #get band top songs
 	#print "\n$temp\n";
@@ -45,30 +47,22 @@ do
 		$postcount=0;
 		while ($filecontents =~ m/datetime=\"(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)-(\d+):(\d+)\"/g) {
 			$postcount++;
-			print "\tHour: $4";
+			#print "\tHour: $4";
 			$hours[$postcount] = $4;
 			
 		}
 		
-		if ($filecontents =~ m/view more:&#32;<a href=\"(\S+)\" rel=\"nofollow next\" >/)
+		if ($filecontents =~ m/<a href=\"(\S+)\" rel=\"nofollow next\" >/)
 		{
 			$url = $1;
+			$reachedend=0;
 		}
-		else
-		{
-			$reachedend=1;
-		}
-		print "\nURL: $url";
-		
-		
-		
-		
 		
 		
 	}
 	
 	
-	$reachedend=1;
+	#$reachedend=1;
 	
 } until ($reachedend);
 
