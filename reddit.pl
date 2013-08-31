@@ -14,15 +14,15 @@ my $dir = $1; #directory path of script
 #$|++; #autoflush disk buffer
 
 
-my $sub = 'http://www.reddit.com/r/dataisbeautiful/top/?sort=top&t=month'; #url for subreddit, blank to grab from command line
+my $sub = 'http://www.reddit.com/r/dataisbeautiful/new/'; #url for subreddit, blank to grab from command line
 if (!$sub) {$sub = $ARGV[0];}
 my $linxdump = 'reddit.html';
-my $debug=1;
+my $debug=0;
+my $maxpostlimit = 100; #stop getting posts after this limit
 
 my $temp;
 my $reachedend = 0; #flag, set to 1 when we hit the last post
 my $url = $sub;
-my $postcount = 0;
 my $totalposts = 0;
 my @scores; #post scores
 my @hours; #post hours
@@ -43,9 +43,7 @@ do
 	open my $ifile, '<', $linxdump;
 	while (my $filecontents = <$ifile>) 
 	{#go through reddit dump, grab post data
-		$postcount=0;
 		while ($filecontents =~ m/<div class="score likes">(\d+)<\/div>/g) {
-			$postcount++; #resets per page
 			$totalposts++; #a running count of all posts, does not reset
 			print "\nScore: $1";
 			push(@scores, $1);
@@ -54,7 +52,6 @@ do
 		#submitted&#32;<time title="Wed Aug 7 20:04:25 2013 UTC" datetime="2013-08-07T13:04:25-07:00">23 days</time>
 		while ($filecontents =~ m/submitted&#32;<time title=\"(\w{3}) (\w{3}) (\d{1,2}) (\d{2}):(\d{2}):(\d{2}) (\d{4}) UTC\" datetime=\"(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)-(\d+):(\d+)\"/g)
 		{
-			$postcount++;
 			push(@hours, $4);
 			push(@dows, $dow2num{$1});
 			#$dow = Day_of_Week($1,$2,$3);
@@ -67,12 +64,10 @@ do
 			if (!$debug) {$reachedend=0;}
 		}
 	}
-	
+	if ($totalposts >= $maxpostlimit) {$reachedend=1;}
 } until ($reachedend);
 
 #now we have all the data
-
-
 
 
 print "\nDone\n\n";
