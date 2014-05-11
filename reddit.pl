@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-#reddit parser by Dale Swanson Aug 30 2013
+#reddit parser by Stephen Wetzel Aug 30 2013
 #requires gnuplot
 
 use strict;
